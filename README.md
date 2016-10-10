@@ -157,7 +157,7 @@ As you can see, the input is fed through several layers, then the final layer
 diverges: one softmax classifier for hours and one for minutes.
 Note that both classifiers are using the same learned features.
 
-### Run the model
+### Learn!
 
 (NOTE: Make sure you have tensorflow installed and loaded.)
 
@@ -180,7 +180,7 @@ You can also visualize the loss over time using tensorboard:
 
     tensorboard --logdir tf_data/ --reload_interval 15    
 
-And finally navigate to http://localhost:6006/ to see the learning progress.
+And finally navigate to <http://localhost:6006/> to see the learning progress.
 
 NOTE: We store each run of tensorflow separately.
 They will all show up in tensorboard.
@@ -213,18 +213,18 @@ Error metrics:
 
 2. Classification precision
 
-   One useful metric is to know how often we get the classification correct
-   (i.e. I predict minutes = 15 and it matches ground truth).
-   
-   We use tf's `in_top_k` with k=1 to do exactly that, for both hours and
-   minutes.
-   
-       train_accuracy_h_op = tf.nn.in_top_k(logits_hours, labels_hours, 1)
-       train_accuracy_m_op = tf.nn.in_top_k(logits_minutes, labels_minutes, 1)
-
-   This is shown in the log as follows: 
-   
-       training set precision = 0.169(h) 0.034(m) 	 (640 samples)
+    One useful metric is to know how often we get the classification correct
+    (i.e. I predict minutes = 15 and it matches ground truth).
+    
+    We use tf's `in_top_k` with k=1 to do exactly that, for both hours and
+    minutes.
+    
+        train_accuracy_h_op = tf.nn.in_top_k(logits_hours, labels_hours, 1)
+        train_accuracy_m_op = tf.nn.in_top_k(logits_minutes, labels_minutes, 1)
+    
+    This is shown in the log as follows: 
+    
+        training set precision = 0.169(h) 0.034(m) 	 (640 samples)
       
     means we got 17% of the hours correct and 3% of the minutes correct.
     Note this does not account for *how far off* any prediction might be, being
@@ -250,26 +250,32 @@ Error metrics:
     
 #### Running the evaluation pipeline 
 
-One of the nice things
+You'll notice that we have a separate evaluation pipeline.
+This enables us to compute the validation set accuracy *during* the 
+optimization, and see how well we are doing on a held-out set of clock images.
+
 
    1. Instantiate the same model as the training pipeline
-   1. Set up a data pipeline on held-out test data
+   1. Set up a data pipeline on held-out validation (or test) data
    1. Then, every few seconds:
-      1. Load the latest trained model file (setting the parameters)
-      1. Run the model on the test data
+      1. Load the latest trained model file (sets the parameters)
+      1. Run the model on the held out data
       1. Report metrics
 
 > Run the evaluation pipeline
 
     $ python clock_reading/clock_evaluation.py
 
+This will report the holdout accuracy every few seconds (few = 30 by default).
+
+NOTE: When multiple runs are available in `tf_data/`, the evaluation loads the
+latest one (ordered alphabetically).
+
 > Visualize in tensorboard:
 
     $ tensorboard --port 6007 --logdir tf_eval/ --reload_interval 15
     
-And navigate to http://localhost:6007/
-
-NOTE: When multiple runs are available in `tf_data/`, we load the latest one.  
+And navigate to <http://localhost:6007/>
 
 ## Observations & Notes
 
