@@ -151,11 +151,13 @@ In this way, the model uses the same parameters for all other layers.
 
 The final model looks something like this:
 
-TODO: Add image of graph.
+![alt-text][tf_graph]
 
-As you can see, the input is fed through several layers, then the final layer
+[tf_graph]: https://raw.githubusercontent.com/felixduvallet/deep-time-reading/master/assets/tf_graph.png "Tensorflow graph"
+
+As you can see, the input (at the bottom) is fed through several layers, then the final layer
 diverges: one softmax classifier for hours and one for minutes.
-Note that both classifiers are using the same learned features.
+Note that both classifiers are using the same learned intermediate features.
 
 ### Learn!
 
