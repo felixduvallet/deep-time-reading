@@ -19,6 +19,15 @@ from clock_reading import clock_evaluation
 from clock_reading import clock_data
 
 
+FLAGS = tf.app.flags.FLAGS
+tf.app.flags.DEFINE_integer('hour', 1,
+                            """Ground truth hour.""")
+tf.app.flags.DEFINE_integer('minute', 5,
+                            """Ground truth minute.""")
+tf.app.flags.DEFINE_string('image', None,
+                           """Image file (optional).""")
+
+
 def main(hour, minute, fname=None):
     # ** Read the data. **
     true_h, true_m = hour, minute
@@ -63,7 +72,8 @@ def main(hour, minute, fname=None):
             return
 
         # Evaluate the model; get probabilities.
-        ([prob_h], [prob_m]) = sess.run([likelihood_h, likelihood_m])
+        ([prob_h], [prob_m], label_h, label_m) = sess.run(
+            [likelihood_h, likelihood_m, hour, minute])
 
         # Sort in descending order.
         sort_idx_h = np.argsort(prob_h)[::-1]
@@ -74,18 +84,19 @@ def main(hour, minute, fname=None):
 
         for idx in range(0, 3):
             (pred_h, pred_m) = sort_idx_h[idx], sort_idx_m[idx]
-            correct_h = '*' if pred_h == true_h else ' '
-            correct_m = '*' if pred_m == true_m else ' '
+            correct_h = '*' if pred_h == label_h else ' '
+            correct_m = '*' if pred_m == label_m else ' '
 
             print('  H {:2d} (p = {:.2f}) {} |  M {:2d} (p = {:.2f})  {}'.format(
                 pred_h, prob_h[pred_h], correct_h,
                 pred_m, prob_m[pred_m], correct_m,
             ))
         print('==================')
-        print('Truth: H {:2d}  |  M {:2d}'.format(true_h, true_m))
+        print('Truth: H {:2d}  |  M {:2d}'.format(label_h, label_m))
 
 
 if __name__ == "__main__":
 
-    main(hour=1,
-         minute=5)
+    main(hour=FLAGS.hour,
+         minute=FLAGS.minute,
+         fname=FLAGS.image)
